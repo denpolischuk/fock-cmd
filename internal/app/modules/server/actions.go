@@ -28,7 +28,9 @@ func getNodeModulesBinPath(conf *config.GlobalConfig, bin string) (string, error
 
 func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
-		conf.Read()
+		if err := conf.Read(); err != nil {
+			return err
+		}
 		substr, _ := getNodeModulesBinPath(conf, "nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
 			ppid, _ := p.Ppid()
@@ -42,13 +44,17 @@ func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 
 func getStopAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
-		conf.Read()
+		if err := conf.Read(); err != nil {
+			return err
+		}
 		substr, _ := getNodeModulesBinPath(conf, "nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
 			ppid, _ := p.Ppid()
 			if err := p.SendSignal(syscall.SIGINT); err != nil {
 				log.Fatal(err)
 			}
+			cmd := exec.Command("rm", logOutputFilePath)
+			go cmd.Start()
 			emoji.Printf("\U00002705 Fock node server (PID %d) was stopped", ppid)
 		} else {
 			emoji.Println(notRunningMessage)
@@ -59,7 +65,9 @@ func getStopAction(conf *config.GlobalConfig) modules.ActionGetter {
 
 func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
-		conf.Read()
+		if err := conf.Read(); err != nil {
+			return err
+		}
 		substr, _ := getNodeModulesBinPath(conf, "nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
 			ppid, _ := p.Ppid()
@@ -68,8 +76,12 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 		}
 
 		fockPath, _ := conf.GetFockPath()
+		cmdOut1, cmdOut2 := "", ""
+		if c.Bool("detached") {
+			cmdOut1, cmdOut2 = ">", logOutputFilePath
+		}
 
-		cmd := exec.Command("rm", "-f", logOutputFilePath, "&&", "yarn", "--cwd", fockPath, "dev-server", ">", logOutputFilePath)
+		cmd := exec.Command("yarn", "--cwd", fockPath, "dev-server", cmdOut1, cmdOut2)
 
 		if !c.Bool("detached") {
 			cmd.Stdout = os.Stdout
@@ -92,7 +104,9 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 
 func getAttachAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
-		conf.Read()
+		if err := conf.Read(); err != nil {
+			return err
+		}
 
 		substr, _ := getNodeModulesBinPath(conf, "nodemon")
 		if b, _ := utils.IsProcessRunning(substr); !b {

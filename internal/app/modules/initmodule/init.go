@@ -20,7 +20,7 @@ func New(conf *config.GlobalConfig) (*Init, error) {
 			Name:  "init",
 			Usage: "config CLI tool to work with your Fock instance",
 			Flags: []cli.Flag{
-				&cli.StringFlag{Name: "path", Aliases: []string{"p"}, Usage: "Path to Fock root folder"},
+				&cli.StringFlag{Name: "path", Aliases: []string{"p"}, Usage: "Path to Fock root folder", Required: true},
 			},
 			Action: getInitAction(conf),
 		},

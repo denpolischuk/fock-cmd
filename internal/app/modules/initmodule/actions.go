@@ -18,8 +18,9 @@ func getInitAction(conf *config.GlobalConfig) modules.ActionGetter {
 			if strings.Trim(strings.ToLower(userInput), " %n") != "y" {
 				return nil
 			}
+		} else if err != config.ErrConfigNotFound {
+			return err
 		}
-
 		conf.PathToFock = c.String("path")
 		if err := conf.Write(); err != nil {
 			return err

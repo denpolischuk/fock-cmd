@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -11,6 +10,9 @@ import (
 var (
 	configFilePath = fmt.Sprintf("%s/.config/fock", os.Getenv("HOME"))
 	fileName       = configFilePath + "/conf.json"
+
+	// ErrConfigNotFound - config not found err
+	ErrConfigNotFound = fmt.Errorf("Couldn't find config file. Did you run fock init previously?")
 )
 
 // GlobalConfig - global config of the cli
@@ -26,7 +28,7 @@ func (c *GlobalConfig) Read() error {
 
 	confFile, err := os.Open(fileName)
 	if err != nil {
-		log.Fatal(err)
+		return ErrConfigNotFound
 	}
 	defer confFile.Close()
 
@@ -35,7 +37,7 @@ func (c *GlobalConfig) Read() error {
 		return err
 	}
 
-	return err
+	return nil
 }
 
 // Write - write global config into file
