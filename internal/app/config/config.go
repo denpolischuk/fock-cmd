@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 var (
@@ -19,6 +20,10 @@ type GlobalConfig struct {
 
 // Read - read global config from file
 func (c *GlobalConfig) Read() error {
+	if c.PathToFock != "" {
+		return nil
+	}
+
 	confFile, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
@@ -50,4 +55,13 @@ func (c *GlobalConfig) Write() error {
 	}
 
 	return nil
+}
+
+// GetFockPath - returns safe fock path string
+func (c *GlobalConfig) GetFockPath() (string, error) {
+	if c.PathToFock == "" {
+		return "", fmt.Errorf("PathToFock is empty or config is not initialized")
+	}
+
+	return strings.TrimRight(c.PathToFock, " /"), nil
 }
