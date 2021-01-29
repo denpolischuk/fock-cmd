@@ -30,6 +30,19 @@ func New(conf *config.GlobalConfig) (*Server, error) {
 					Usage:  "stops server if it's running",
 					Action: getStopAction(conf),
 				},
+				{
+					Name:  "start",
+					Usage: "starts fock node server in watch mode",
+					Flags: []cli.Flag{
+						&cli.BoolFlag{Name: "detached", Aliases: []string{"d"}, Usage: "Run fock node server in detached mode"},
+					},
+					Action: getStartAction(conf),
+				},
+				{
+					Name:   "attach",
+					Usage:  "attach to already running fock node server's stdout",
+					Action: getAttachAction(conf),
+				},
 			},
 		},
 		Config: conf,
