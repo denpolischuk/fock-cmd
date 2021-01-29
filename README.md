@@ -2,4 +2,6 @@
 
 This is a CLI tool that is designed to help with developer experience while working in Fock.
 
-// TODO add documentation
+## Build
+
+Run `make` or `make build` to build the project. You will see the binary `fock-cmd` in the root folder.
