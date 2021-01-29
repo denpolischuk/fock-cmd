@@ -1,7 +1,7 @@
 .PHONY: build
 
 build:
-	go build -v ./cmd/fock-cmd
+	go build -v -o fock ./cmd/fock-cmd
 
 .PHONY: test
 test:
