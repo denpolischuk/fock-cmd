@@ -62,8 +62,23 @@ func (c *GlobalConfig) Write() error {
 // GetFockPath - returns safe fock path string
 func (c *GlobalConfig) GetFockPath() (string, error) {
 	if c.PathToFock == "" {
-		return "", fmt.Errorf("PathToFock is empty or config is not initialized")
+		if err := c.Read(); err != nil {
+			return "", err
+		}
+		if c.PathToFock == "" {
+			return "", fmt.Errorf("PathToFock is empty or config is not initialized")
+		}
 	}
 
 	return strings.TrimRight(c.PathToFock, " /"), nil
+}
+
+// GetNodeModulesBinPath - returns path to fock's node_modules/.bin dir
+func (c *GlobalConfig) GetNodeModulesBinPath(bin string) (string, error) {
+	fockPath, err := c.GetFockPath()
+	if err != nil {
+		return "", err
+	}
+
+	return fockPath + "/node_modules/.bin/" + bin, nil
 }

@@ -18,23 +18,14 @@ const (
 	notRunningMessage = "\U0000274C Fock server is not running"
 )
 
-func getNodeModulesBinPath(conf *config.GlobalConfig, bin string) (string, error) {
-	if fockPath, err := conf.GetFockPath(); err != nil {
-		return "", err
-	} else {
-		return fockPath + "/node_modules/.bin/" + bin, nil
-	}
-}
-
 func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
 		if err := conf.Read(); err != nil {
 			return err
 		}
-		substr, _ := getNodeModulesBinPath(conf, "nodemon")
+		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
-			ppid, _ := p.Ppid()
-			emoji.Printf("\U00002705 Fock node server is running (PID %d)", ppid)
+			emoji.Printf("\U00002705 Fock node server is running (PID %d)", p.Pid)
 		} else {
 			emoji.Println(notRunningMessage)
 		}
@@ -47,15 +38,14 @@ func getStopAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if err := conf.Read(); err != nil {
 			return err
 		}
-		substr, _ := getNodeModulesBinPath(conf, "nodemon")
+		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
-			ppid, _ := p.Ppid()
 			if err := p.SendSignal(syscall.SIGINT); err != nil {
 				log.Fatal(err)
 			}
 			cmd := exec.Command("rm", logOutputFilePath)
 			go cmd.Start()
-			emoji.Printf("\U00002705 Fock node server (PID %d) was stopped", ppid)
+			emoji.Printf("\U00002705 Fock node server (PID %d) was stopped", p.Pid)
 		} else {
 			emoji.Println(notRunningMessage)
 		}
@@ -68,10 +58,9 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if err := conf.Read(); err != nil {
 			return err
 		}
-		substr, _ := getNodeModulesBinPath(conf, "nodemon")
+		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
-			ppid, _ := p.Ppid()
-			emoji.Printf("\U00002806 Fock node server (PID %d) is already running", ppid)
+			emoji.Printf("\U00002806 Fock node server (PID %d) is already running", p.Pid)
 			return nil
 		}
 
@@ -82,13 +71,14 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 		}
 
 		cmd := exec.Command("yarn", "--cwd", fockPath, "dev-server", cmdOut1, cmdOut2)
-
 		if !c.Bool("detached") {
 			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
 		}
 
 		if err := cmd.Start(); err != nil {
 			cmd.Stdout = nil
+			cmd.Stderr = nil
 			log.Fatal(err)
 		}
 
@@ -108,7 +98,7 @@ func getAttachAction(conf *config.GlobalConfig) modules.ActionGetter {
 			return err
 		}
 
-		substr, _ := getNodeModulesBinPath(conf, "nodemon")
+		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, _ := utils.IsProcessRunning(substr); !b {
 			emoji.Println(notRunningMessage)
 			return nil

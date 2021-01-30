@@ -52,7 +52,7 @@ func New(conf *config.GlobalConfig) (*Server, error) {
 // GetCommand - returns command of Init module
 func (s *Server) GetCommand() (*cli.Command, error) {
 	if s.Command == nil {
-		return nil, fmt.Errorf("Init module doesn't have command initialized")
+		return nil, fmt.Errorf("Server module doesn't have command initialized")
 	}
 
 	return s.Command, nil
