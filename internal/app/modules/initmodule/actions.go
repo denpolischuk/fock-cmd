@@ -51,10 +51,11 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 		if userInput != "" {
 			zshPath = userInput
 		}
-		outp, err := exec.Command("bash", "-c", fmt.Sprintf(`printf "\n%s %s/zsh_autocompletion\n" >> %s`, ZshRcScript, config.ConfigFilePath, zshPath)).Output()
-		fmt.Println(string(outp))
+
+		err := exec.Command("bash", "-c", fmt.Sprintf(`printf "\n%s %s/zsh_autocompletion\n" >> %s`, ZshRcScript, config.ConfigFilePath, zshPath)).Run()
 		if err != nil {
 			fmt.Println(err)
+
 			return
 		}
 		break
