@@ -49,9 +49,10 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name:     "Fock CLI",
-		Usage:    "This is the Fock CLI tool designed to help you working with fock instace.",
-		Commands: commands,
+		Name:                 "Fock CLI",
+		Usage:                "This is the Fock CLI tool designed to help you working with fock instace.",
+		EnableBashCompletion: true,
+		Commands:             commands,
 	}
 
 	if err := app.Run(os.Args); err != nil {
