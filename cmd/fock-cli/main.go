@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/denpolischuk/fock-cmd/internal/app/config"
-	"github.com/denpolischuk/fock-cmd/internal/app/modules"
-	"github.com/denpolischuk/fock-cmd/internal/app/modules/initmodule"
-	"github.com/denpolischuk/fock-cmd/internal/app/modules/server"
+	"github.com/denpolischuk/fock-cli/internal/app/config"
+	"github.com/denpolischuk/fock-cli/internal/app/modules"
+	"github.com/denpolischuk/fock-cli/internal/app/modules/initmodule"
+	"github.com/denpolischuk/fock-cli/internal/app/modules/server"
 	"github.com/urfave/cli/v2"
 )
 

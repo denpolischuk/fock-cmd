@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/denpolischuk/fock-cmd/internal/app/config"
-	"github.com/denpolischuk/fock-cmd/internal/app/modules"
-	"github.com/denpolischuk/fock-cmd/internal/app/utils"
+	"github.com/denpolischuk/fock-cli/internal/app/config"
+	"github.com/denpolischuk/fock-cli/internal/app/modules"
+	"github.com/denpolischuk/fock-cli/internal/app/utils"
 	"github.com/kyokomi/emoji"
 	"github.com/urfave/cli/v2"
 )

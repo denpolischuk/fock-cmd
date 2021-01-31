@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 
-	"github.com/denpolischuk/fock-cmd/internal/app/config"
+	"github.com/denpolischuk/fock-cli/internal/app/config"
 	"github.com/urfave/cli/v2"
 )
 

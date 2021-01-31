@@ -1,4 +1,4 @@
-module github.com/denpolischuk/fock-cmd
+module github.com/denpolischuk/fock-cli
 
 go 1.15
 
