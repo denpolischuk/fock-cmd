@@ -19,6 +19,8 @@ var (
 	re, _ = regexp.Compile(`\W+`)
 )
 
+const autocompletionInstalledMessage = "[Autocompletion]: Successfuly installed. You will need to restart your shell session."
+
 func setupAutocompletion(conf *config.GlobalConfig) {
 	fmt.Print("[Autocompletion]: Do you want to setup autocompletion? (Y/n): ")
 	var userInput string
@@ -48,6 +50,7 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 		if err != nil {
 			fmt.Println(err)
 		}
+		emoji.Println(autocompletionInstalledMessage)
 		break
 	case "bash":
 		b := []byte(BashAutocompletionScript)
@@ -55,7 +58,7 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 			fmt.Println(err)
 			return
 		}
-		emoji.Println("[Autocompletion]: Successfuly installed. You will need to restart your shell session.")
+		emoji.Println(autocompletionInstalledMessage)
 		break
 	default:
 		emoji.Println(defaultShellDetectErrorMessage)
