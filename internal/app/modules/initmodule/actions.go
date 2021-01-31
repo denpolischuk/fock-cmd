@@ -8,14 +8,11 @@ import (
 	"strings"
 
 	"github.com/denpolischuk/fock-cli/internal/app/config"
+	"github.com/denpolischuk/fock-cli/internal/app/consts"
 	"github.com/denpolischuk/fock-cli/internal/app/modules"
 	"github.com/denpolischuk/fock-cli/internal/app/utils"
 	"github.com/kyokomi/emoji"
 	"github.com/urfave/cli/v2"
-)
-
-const (
-	defaultShellDetectErrorMessage = "[Autocompletion]: \U00002620 couldn't detect default shell. Aborting..."
 )
 
 var (
@@ -44,23 +41,21 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 			fmt.Println(err)
 			return
 		}
-		zshPath := utils.PathToZshRc
-		fmt.Printf("[Autocompletion]: Provide the path to .zshrc? [%s]: ", zshPath)
-		userInput = ""
-		fmt.Scanln(&userInput)
-		if userInput != "" {
-			zshPath = userInput
-		}
+		zshPath := utils.PromptPathToResource("[Autocompletion]: Provide the path to .zshrc?", consts.PathToZshRc)
 
+		// TODO write to file using Go instead of bash and check if this script is already in file
 		err := exec.Command("bash", "-c", fmt.Sprintf(`printf "\n%s %s/zsh_autocompletion\n" >> %s`, ZshRcScript, config.ConfigFilePath, zshPath)).Run()
 		if err != nil {
 			fmt.Println(err)
-
-			return
 		}
 		break
 	case "bash":
-
+		b := []byte(BashAutocompletionScript)
+		if err := ioutil.WriteFile("/etc/bash_completion.d/"+consts.AppBinName, b[:len(b)-1], 0644); err != nil {
+			fmt.Println(err)
+			return
+		}
+		emoji.Println("[Autocompletion]: Successfuly installed. You will need to restart your shell session.")
 		break
 	default:
 		emoji.Println(defaultShellDetectErrorMessage)
