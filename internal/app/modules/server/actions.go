@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/denpolischuk/fock-cli/internal/app/config"
+	"github.com/denpolischuk/fock-cli/internal/app/consts"
 	"github.com/denpolischuk/fock-cli/internal/app/modules"
 	"github.com/denpolischuk/fock-cli/internal/app/utils"
 	"github.com/kyokomi/emoji"
@@ -15,8 +16,9 @@ import (
 
 const (
 	logOutputFilePath = "/tmp/fock_server_output"
-	notRunningMessage = "\U0000274C Fock server is not running"
 )
+
+var notRunningMessage = consts.Emojis["fail"] + " Fock server is not running"
 
 func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
@@ -25,7 +27,7 @@ func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 		}
 		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
-			emoji.Printf("\U00002705 Fock node server is running (PID %d)", p.Pid)
+			emoji.Printf(consts.Emojis["success"]+" Fock node server is running (PID %d)", p.Pid)
 		} else {
 			emoji.Println(notRunningMessage)
 		}
@@ -45,7 +47,7 @@ func getStopAction(conf *config.GlobalConfig) modules.ActionGetter {
 			}
 			cmd := exec.Command("rm", logOutputFilePath)
 			go cmd.Start()
-			emoji.Printf("\U00002705 Fock node server (PID %d) was stopped", p.Pid)
+			emoji.Printf(consts.Emojis["success"]+" Fock node server (PID %d) was stopped", p.Pid)
 		} else {
 			emoji.Println(notRunningMessage)
 		}
@@ -60,7 +62,7 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 		}
 		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
-			emoji.Printf("\U00002806 Fock node server (PID %d) is already running", p.Pid)
+			emoji.Printf(consts.Emojis["think"]+" Fock node server (PID %d) is already running", p.Pid)
 			return nil
 		}
 
@@ -85,7 +87,7 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if !c.Bool("detached") {
 			cmd.Wait()
 		} else {
-			emoji.Printf("\U00002705 Fock node server (PID %d) was started", cmd.Process.Pid)
+			emoji.Printf(consts.Emojis["success"]+" Fock node server (PID %d) was started", cmd.Process.Pid)
 		}
 
 		return nil

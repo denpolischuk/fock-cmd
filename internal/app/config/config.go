@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	configFilePath = fmt.Sprintf("%s/.config/fock", os.Getenv("HOME"))
-	fileName       = configFilePath + "/conf.json"
+	// ConfigFilePath - Default config folder path
+	ConfigFilePath = fmt.Sprintf("%s/.config/fock", os.Getenv("HOME"))
+	fileName       = ConfigFilePath + "/conf.json"
 
 	// ErrConfigNotFound - config not found err
 	ErrConfigNotFound = fmt.Errorf("Couldn't find config file. Did you run fock init previously?")
@@ -42,8 +43,8 @@ func (c *GlobalConfig) Read() error {
 
 // Write - write global config into file
 func (c *GlobalConfig) Write() error {
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		os.Mkdir(configFilePath, os.ModePerm)
+	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
+		os.Mkdir(ConfigFilePath, os.ModePerm)
 	}
 
 	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, os.ModePerm)

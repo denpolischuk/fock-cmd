@@ -7,6 +7,7 @@ require (
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/kyokomi/emoji v2.2.4+incompatible
 	github.com/shirou/gopsutil v3.20.12+incompatible
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
 )
