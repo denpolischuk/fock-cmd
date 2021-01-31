@@ -1,5 +1,7 @@
 package initmodule
 
+import "github.com/denpolischuk/fock-cli/internal/app/consts"
+
 const (
 	// ZshAutocompletionScript ...
 	ZshAutocompletionScript = `
@@ -29,11 +31,10 @@ compdef _cli_zsh_autocomplete $PROG
 	`
 
 	// ZshRcScript - part of zsh script to be written into .zshrc
-	ZshRcScript = "PROG=fock _CLI_ZSH_AUTOCOMPLETE_HACK=1 source "
+	ZshRcScript = "PROG=" + consts.AppBinName + " _CLI_ZSH_AUTOCOMPLETE_HACK=1 source "
 	// BashAutocompletionScript ...
 	BashAutocompletionScript = `
 #! /bin/bash
-PROG=fock
 
 : ${PROG:=$(basename ${BASH_SOURCE})}
 
@@ -54,5 +55,7 @@ _cli_bash_autocomplete() {
 
 complete -o bashdefault -o default -o nospace -F _cli_bash_autocomplete $PROG
 unset PROG
-	`
+  `
 )
+
+var defaultShellDetectErrorMessage = "[Autocompletion]: " + consts.Emojis["dead"] + " couldn't detect default shell. Aborting..."
