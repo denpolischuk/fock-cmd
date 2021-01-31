@@ -9,11 +9,17 @@ Run `make` or `make build` to build the project. You will see the binary `fock` 
 ## TODO
 ### Features
  - [ ] Init module
- - - [ ] Save path to fock in config dir
- - - [ ] Setup autocompletion
- - - - [ ] zsh
- - - - [ ] bash
+ - - [x] Save path to fock in config dir
+ - - [x] Setup autocompletion
+ - - - [x] zsh
+ - - - [x] bash
  - - [ ] Check fock path for package.json
+ - [x] Server module
+ - - [x] Status
+ - - [x] Start
+ - - - [x] Detached mode
+ - - [x] Stop
+ - - [x] Attach
  - [ ] Dependencies module
  - - [ ] Purge node modules
  - - [ ] Install dependencies
