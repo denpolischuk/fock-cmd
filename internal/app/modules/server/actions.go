@@ -14,12 +14,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const (
-	logOutputFilePath = "/tmp/fock_server_output"
-)
-
-var notRunningMessage = consts.Emojis["fail"] + " Fock server is not running"
-
 func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
 		if err := conf.Read(); err != nil {
