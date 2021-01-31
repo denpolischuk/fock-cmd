@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/denpolischuk/fock-cmd/internal/app/config"
-	"github.com/denpolischuk/fock-cmd/internal/app/modules"
+	"github.com/denpolischuk/fock-cli/internal/app/config"
+	"github.com/denpolischuk/fock-cli/internal/app/modules"
 	"github.com/urfave/cli/v2"
 )
 
