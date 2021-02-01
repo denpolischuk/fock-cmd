@@ -23,16 +23,3 @@ func GetUserShell() (string, error) {
 
 	return re.ReplaceAllString(shell, ""), nil
 }
-
-// PromptPathToResource - Asks user path to zsh or uses default one if user input is empty
-func PromptPathToResource(promptStr string, def string) string {
-	path := def
-	var userInput string
-	fmt.Printf("%s [%s]: ", promptStr, path)
-	userInput = ""
-	fmt.Scanln(&userInput)
-	if userInput != "" {
-		path = userInput
-	}
-	return path
-}
