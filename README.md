@@ -13,7 +13,7 @@ Run `make` or `make build` to build the project. You will see the binary `fock` 
  - - [x] Setup autocompletion
  - - - [x] zsh
  - - - [x] bash
- - - [ ] Check fock path for package.json
+ - - [*] Check fock path for package.json
  - [x] Server module
  - - [x] Status
  - - [x] Start
