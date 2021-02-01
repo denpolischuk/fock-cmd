@@ -8,12 +8,12 @@ Run `make` or `make build` to build the project. You will see the binary `fock` 
 
 ## TODO
 ### Features
- - [ ] Init module
+ - [x] Init module
  - - [x] Save path to fock in config dir
  - - [x] Setup autocompletion
  - - - [x] zsh
  - - - [x] bash
- - - [*] Check fock path for package.json
+ - - [x] Check fock path for package.json
  - [x] Server module
  - - [x] Status
  - - [x] Start
