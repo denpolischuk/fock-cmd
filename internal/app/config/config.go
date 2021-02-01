@@ -2,17 +2,24 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
+
+	"github.com/denpolischuk/fock-cli/internal/app/utils"
 )
+
+const packageJSONAppName = `"name": "@redteclab/fock"`
 
 var (
 	// ConfDirPath - user config dir path
 	ConfDirPath, _ = os.UserConfigDir()
 	// ConfigDirPath - Default config folder path
 	ConfigDirPath = filepath.Join(ConfDirPath, "fock")
-	confFilePath  = filepath.Join(ConfigDirPath, "conf.json")
+	// ConfFilePath - path to fock cli config file
+	ConfFilePath = filepath.Join(ConfigDirPath, "conf.json")
 
 	// ErrConfigNotFound - config not found err
 	ErrConfigNotFound = fmt.Errorf("Couldn't find config file. Did you run fock init previously?")
@@ -29,7 +36,7 @@ func (c *GlobalConfig) Read() error {
 		return nil
 	}
 
-	confFile, err := os.Open(confFilePath)
+	confFile, err := os.Open(ConfFilePath)
 	if err != nil {
 		return ErrConfigNotFound
 	}
@@ -43,13 +50,24 @@ func (c *GlobalConfig) Read() error {
 	return nil
 }
 
+func (c *GlobalConfig) beforeWrite() error {
+	if err := c.checkFockPath(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Write - write global config into file
 func (c *GlobalConfig) Write() error {
+	if err := c.beforeWrite(); err != nil {
+		return err
+	}
+
 	if _, err := os.Stat(ConfigDirPath); os.IsNotExist(err) {
 		os.Mkdir(ConfigDirPath, os.ModePerm)
 	}
 
-	file, err := os.OpenFile(confFilePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	file, err := os.OpenFile(ConfFilePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -57,6 +75,22 @@ func (c *GlobalConfig) Write() error {
 	encoder := json.NewEncoder(file)
 	if err := encoder.Encode(c); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (c *GlobalConfig) checkFockPath() error {
+	p := filepath.Join(path.Clean(c.PathToFock), "package.json")
+	if !utils.FileExists(p) {
+		return errors.New("fock path is not correct or fock folder misses 'package.json' file")
+	}
+	f, err := os.OpenFile(p, os.O_RDONLY, 0644)
+	if err != nil {
+		return err
+	}
+	if !utils.FileContains(f, packageJSONAppName) {
+		return errors.New("fock path is not correct or app name in package.json was changed")
 	}
 
 	return nil

@@ -43,7 +43,7 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 		autocompletionPath := filepath.Join(config.ConfigDirPath, "zsh_autocompletion")
 
 		// If autocompletion script doesn't exists then create it
-		if _, err := os.Stat(autocompletionPath); os.IsNotExist(err) {
+		if !utils.FileExists(autocompletionPath) {
 			if err := ioutil.WriteFile(autocompletionPath, b[:len(b)-1], 0644); err != nil {
 				fmt.Println(err)
 				return
@@ -89,16 +89,14 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 
 func getInitAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
-		if err := conf.Read(); err == nil { // If no error was returned then config file already exists
-			fmt.Print(fmt.Sprintf("You already have configured fock path (%s), do you want to rewrite the config? (N/y): ", conf.PathToFock))
+		if utils.FileExists(config.ConfFilePath) {
+			fmt.Print(fmt.Sprintf("You already have configured fock CLI, do you want to rewrite configs? (N/y): "))
 			var userInput string
 			fmt.Scanln(&userInput)
-			if strings.Trim(strings.ToLower(userInput), " %n") != "y" {
+			if strings.ToLower(re.ReplaceAllString(userInput, "")) != "y" {
 				setupAutocompletion(conf)
 				return nil
 			}
-		} else if err != config.ErrConfigNotFound {
-			return err
 		}
 		conf.PathToFock = c.String("path")
 		if err := conf.Write(); err != nil {

@@ -36,3 +36,11 @@ func FileContains(f *os.File, str string) bool {
 
 	return false
 }
+
+// FileExists - returns true if file exists, false otherwise
+func FileExists(p string) bool {
+	if _, err := os.Stat(p); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
