@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
+	"path/filepath"
 )
 
 var (
-	// ConfigFilePath - Default config folder path
-	ConfigFilePath = fmt.Sprintf("%s/.config/fock", os.Getenv("HOME"))
-	fileName       = ConfigFilePath + "/conf.json"
+	// ConfDirPath - user config dir path
+	ConfDirPath, _ = os.UserConfigDir()
+	// ConfigDirPath - Default config folder path
+	ConfigDirPath = filepath.Join(ConfDirPath, "fock")
+	confFilePath  = filepath.Join(ConfigDirPath, "conf.json")
 
 	// ErrConfigNotFound - config not found err
 	ErrConfigNotFound = fmt.Errorf("Couldn't find config file. Did you run fock init previously?")
@@ -27,7 +29,7 @@ func (c *GlobalConfig) Read() error {
 		return nil
 	}
 
-	confFile, err := os.Open(fileName)
+	confFile, err := os.Open(confFilePath)
 	if err != nil {
 		return ErrConfigNotFound
 	}
@@ -43,11 +45,11 @@ func (c *GlobalConfig) Read() error {
 
 // Write - write global config into file
 func (c *GlobalConfig) Write() error {
-	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
-		os.Mkdir(ConfigFilePath, os.ModePerm)
+	if _, err := os.Stat(ConfigDirPath); os.IsNotExist(err) {
+		os.Mkdir(ConfigDirPath, os.ModePerm)
 	}
 
-	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	file, err := os.OpenFile(confFilePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -71,7 +73,7 @@ func (c *GlobalConfig) GetFockPath() (string, error) {
 		}
 	}
 
-	return strings.TrimRight(c.PathToFock, " /"), nil
+	return filepath.Clean(c.PathToFock), nil
 }
 
 // GetNodeModulesBinPath - returns path to fock's node_modules/.bin dir
@@ -81,5 +83,5 @@ func (c *GlobalConfig) GetNodeModulesBinPath(bin string) (string, error) {
 		return "", err
 	}
 
-	return fockPath + "/node_modules/.bin/" + bin, nil
+	return filepath.Join(fockPath, "node_modules", ".bin", bin), nil
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -39,14 +40,15 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 	switch shell {
 	case "zsh":
 		b := []byte(ZshAutocompletionScript)
-		if err := ioutil.WriteFile(config.ConfigFilePath+"/zsh_autocompletion", b[:len(b)-1], 0644); err != nil {
+		autocompletionPath := filepath.Join(config.ConfigDirPath, "zsh_autocompletion")
+		if err := ioutil.WriteFile(autocompletionPath, b[:len(b)-1], 0644); err != nil {
 			fmt.Println(err)
 			return
 		}
 		zshPath := utils.PromptPathToResource("[Autocompletion]: Provide the path to .zshrc?", consts.PathToZshRc)
 
 		// TODO write to file using Go instead of bash and check if this script is already in file
-		err := exec.Command("bash", "-c", fmt.Sprintf(`printf "\n%s %s/zsh_autocompletion\n" >> %s`, ZshRcScript, config.ConfigFilePath, zshPath)).Run()
+		err := exec.Command("bash", "-c", fmt.Sprintf(`printf "\n%s %s\n" > %s`, ZshRcScript, autocompletionPath, zshPath)).Run()
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -54,7 +56,8 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 		break
 	case "bash":
 		b := []byte(BashAutocompletionScript)
-		if err := ioutil.WriteFile("/etc/bash_completion.d/"+consts.AppBinName, b[:len(b)-1], 0644); err != nil {
+		bashCompletionPath := filepath.Join("etc", "bash_completion.d", consts.AppBinName)
+		if err := ioutil.WriteFile(bashCompletionPath, b[:len(b)-1], 0644); err != nil {
 			fmt.Println(err)
 			return
 		}
