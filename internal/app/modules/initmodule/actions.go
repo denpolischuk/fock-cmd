@@ -60,7 +60,11 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 
 		autocompletionCommand := fmt.Sprintf("%s %s", ZshRcScript, autocompletionPath)
 
-		if !utils.FileContains(zshFile, autocompletionCommand) {
+		conains, err := utils.FileContains(zshFile, autocompletionCommand)
+		if err != nil {
+			fmt.Println(err)
+			return
+		} else if !conains {
 			if _, err := zshFile.WriteString(fmt.Sprintf("\n#Fock CLI autocompletion\n%s\n", autocompletionCommand)); err != nil {
 				fmt.Println(err)
 				return

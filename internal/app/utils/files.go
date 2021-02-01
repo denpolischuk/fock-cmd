@@ -23,18 +23,18 @@ func PromptPathToResource(promptStr string, def string) string {
 }
 
 // FileContains searches string (str) in file (f). Returns true if str was found in f.
-func FileContains(f *os.File, str string) bool {
+func FileContains(f *os.File, str string) (bool, error) {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), str) {
-			return true
+			return true, nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+		return false, err
 	}
 
-	return false
+	return false, nil
 }
 
 // FileExists - returns true if file exists, false otherwise

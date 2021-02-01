@@ -89,7 +89,11 @@ func (c *GlobalConfig) checkFockPath() error {
 	if err != nil {
 		return err
 	}
-	if !utils.FileContains(f, packageJSONAppName) {
+
+	contains, err := utils.FileContains(f, packageJSONAppName)
+	if err != nil {
+		return err
+	} else if !contains {
 		return errors.New("fock path is not correct or app name in package.json was changed")
 	}
 
