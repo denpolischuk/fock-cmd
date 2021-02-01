@@ -2,15 +2,24 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
-	"strings"
+	"path"
+	"path/filepath"
+
+	"github.com/denpolischuk/fock-cli/internal/app/utils"
 )
 
+const packageJSONAppName = `"name": "@redteclab/fock"`
+
 var (
-	// ConfigFilePath - Default config folder path
-	ConfigFilePath = fmt.Sprintf("%s/.config/fock", os.Getenv("HOME"))
-	fileName       = ConfigFilePath + "/conf.json"
+	// ConfDirPath - user config dir path
+	ConfDirPath, _ = os.UserConfigDir()
+	// ConfigDirPath - Default config folder path
+	ConfigDirPath = filepath.Join(ConfDirPath, "fock")
+	// ConfFilePath - path to fock cli config file
+	ConfFilePath = filepath.Join(ConfigDirPath, "conf.json")
 
 	// ErrConfigNotFound - config not found err
 	ErrConfigNotFound = fmt.Errorf("Couldn't find config file. Did you run fock init previously?")
@@ -27,7 +36,7 @@ func (c *GlobalConfig) Read() error {
 		return nil
 	}
 
-	confFile, err := os.Open(fileName)
+	confFile, err := os.Open(ConfFilePath)
 	if err != nil {
 		return ErrConfigNotFound
 	}
@@ -41,13 +50,24 @@ func (c *GlobalConfig) Read() error {
 	return nil
 }
 
+func (c *GlobalConfig) beforeWrite() error {
+	if err := c.checkFockPath(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Write - write global config into file
 func (c *GlobalConfig) Write() error {
-	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
-		os.Mkdir(ConfigFilePath, os.ModePerm)
+	if err := c.beforeWrite(); err != nil {
+		return err
 	}
 
-	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if _, err := os.Stat(ConfigDirPath); os.IsNotExist(err) {
+		os.Mkdir(ConfigDirPath, os.ModePerm)
+	}
+
+	file, err := os.OpenFile(ConfFilePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -55,6 +75,26 @@ func (c *GlobalConfig) Write() error {
 	encoder := json.NewEncoder(file)
 	if err := encoder.Encode(c); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (c *GlobalConfig) checkFockPath() error {
+	p := filepath.Join(path.Clean(c.PathToFock), "package.json")
+	if !utils.FileExists(p) {
+		return errors.New("fock path is not correct or fock folder misses 'package.json' file")
+	}
+	f, err := os.OpenFile(p, os.O_RDONLY, 0644)
+	if err != nil {
+		return err
+	}
+
+	contains, err := utils.FileContains(f, packageJSONAppName)
+	if err != nil {
+		return err
+	} else if !contains {
+		return errors.New("fock path is not correct or app name in package.json was changed")
 	}
 
 	return nil
@@ -71,7 +111,7 @@ func (c *GlobalConfig) GetFockPath() (string, error) {
 		}
 	}
 
-	return strings.TrimRight(c.PathToFock, " /"), nil
+	return filepath.Clean(c.PathToFock), nil
 }
 
 // GetNodeModulesBinPath - returns path to fock's node_modules/.bin dir
@@ -81,5 +121,5 @@ func (c *GlobalConfig) GetNodeModulesBinPath(bin string) (string, error) {
 		return "", err
 	}
 
-	return fockPath + "/node_modules/.bin/" + bin, nil
+	return filepath.Join(fockPath, "node_modules", ".bin", bin), nil
 }

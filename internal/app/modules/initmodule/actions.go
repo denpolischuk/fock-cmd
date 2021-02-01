@@ -3,7 +3,8 @@ package initmodule
 import (
 	"fmt"
 	"io/ioutil"
-	"os/exec"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -39,26 +40,49 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 	switch shell {
 	case "zsh":
 		b := []byte(ZshAutocompletionScript)
-		if err := ioutil.WriteFile(config.ConfigFilePath+"/zsh_autocompletion", b[:len(b)-1], 0644); err != nil {
+		autocompletionPath := filepath.Join(config.ConfigDirPath, "zsh_autocompletion")
+
+		// If autocompletion script doesn't exists then create it
+		if !utils.FileExists(autocompletionPath) {
+			if err := ioutil.WriteFile(autocompletionPath, b[:len(b)-1], 0644); err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+
+		zshPath := utils.PromptPathToResource("[Autocompletion]: Provide the path to .zshrc?", consts.PathToZshRc)
+		zshFile, err := os.OpenFile(zshPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		zshPath := utils.PromptPathToResource("[Autocompletion]: Provide the path to .zshrc?", consts.PathToZshRc)
+		defer zshFile.Close()
 
-		// TODO write to file using Go instead of bash and check if this script is already in file
-		err := exec.Command("bash", "-c", fmt.Sprintf(`printf "\n%s %s/zsh_autocompletion\n" >> %s`, ZshRcScript, config.ConfigFilePath, zshPath)).Run()
+		autocompletionCommand := fmt.Sprintf("%s %s", ZshRcScript, autocompletionPath)
+
+		conains, err := utils.FileContains(zshFile, autocompletionCommand)
 		if err != nil {
 			fmt.Println(err)
+			return
+		} else if !conains {
+			if _, err := zshFile.WriteString(fmt.Sprintf("\n#Fock CLI autocompletion\n%s\n", autocompletionCommand)); err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
+
 		emoji.Println(autocompletionInstalledMessage)
+
 		break
 	case "bash":
 		b := []byte(BashAutocompletionScript)
-		if err := ioutil.WriteFile("/etc/bash_completion.d/"+consts.AppBinName, b[:len(b)-1], 0644); err != nil {
+		bashCompletionPath := filepath.Join("etc", "bash_completion.d", consts.AppBinName)
+		if err := ioutil.WriteFile(bashCompletionPath, b[:len(b)-1], 0644); err != nil {
 			fmt.Println(err)
 			return
 		}
 		emoji.Println(autocompletionInstalledMessage)
+
 		break
 	default:
 		emoji.Println(defaultShellDetectErrorMessage)
@@ -69,16 +93,14 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 
 func getInitAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
-		if err := conf.Read(); err == nil { // If no error was returned then config file already exists
-			fmt.Print(fmt.Sprintf("You already have configured fock path (%s), do you want to rewrite the config? (N/y): ", conf.PathToFock))
+		if utils.FileExists(config.ConfFilePath) {
+			fmt.Print(fmt.Sprintf("You already have configured fock CLI, do you want to rewrite configs? (N/y): "))
 			var userInput string
 			fmt.Scanln(&userInput)
-			if strings.Trim(strings.ToLower(userInput), " %n") != "y" {
+			if strings.ToLower(re.ReplaceAllString(userInput, "")) != "y" {
 				setupAutocompletion(conf)
 				return nil
 			}
-		} else if err != config.ErrConfigNotFound {
-			return err
 		}
 		conf.PathToFock = c.String("path")
 		if err := conf.Write(); err != nil {
