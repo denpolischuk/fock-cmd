@@ -16,19 +16,19 @@ jobs:
         project_path: './cmd/fock-cli'
         binary_name: 'fock'
   release-linux-386:
-    name: release linux/386
+    name: release-linux/386
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: wangyoucao577/go-release-action@v1.14
       with:
         github_token: ${{ secrets.GH_TOKEN }}
-        goarch: "amd64"
+        goarch: "386"
         goos: linux
         project_path: './cmd/fock-cli'
         binary_name: 'fock'
   release-linux-arm:
-    name: release-linux/386
+    name: release-linux/arm
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
         project_path: './cmd/fock-cli'
         binary_name: 'fock'
   release-linux-arm64:
-    name: release-linux/amd64
+    name: release-linux/arm64
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
