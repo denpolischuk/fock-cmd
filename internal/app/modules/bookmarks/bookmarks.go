@@ -1,7 +1,45 @@
 package bookmarks
 
-// Bookmark type
-type Bookmark struct {
-	Alias string `json:"alias"`
-	URL   string `json:"url"`
+import (
+	"fmt"
+
+	"github.com/denpolischuk/fock-cli/internal/app/config"
+	"github.com/urfave/cli/v2"
+)
+
+// Bookmarks - module
+type Bookmarks struct {
+	Command *cli.Command
+	Config  *config.GlobalConfig
+}
+
+// New - creating new Bookmarks module
+func New(conf *config.GlobalConfig) (*Bookmarks, error) {
+	return &Bookmarks{
+		Command: &cli.Command{
+			Name:    "bookmarks",
+			Usage:   "opens stored URL in your browser by its alias.",
+			Aliases: []string{"bm", "bms"},
+			Subcommands: []*cli.Command{
+				{
+					Name:      "add",
+					Aliases:   []string{"create"},
+					Usage:     "adds new bookmark.",
+					UsageText: BookmarksAddUsage,
+					ArgsUsage: "<alias> - url alias for easy access, <URL> - url that will be stored under alias",
+					Action:    getAddBookmarkAction(conf),
+				},
+			},
+		},
+		Config: conf,
+	}, nil
+}
+
+// GetCommand - returns command of Bookmarks module
+func (i *Bookmarks) GetCommand() (*cli.Command, error) {
+	if i.Command == nil {
+		return nil, fmt.Errorf("Init module doesn't have command initialized")
+	}
+
+	return i.Command, nil
 }
