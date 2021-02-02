@@ -1,7 +1,7 @@
 on: 
   release:
     types: [created, edited]
-name: Build Release
+name: Build Release Binaries
 jobs:
   release-linux-amd64:
     name: release linux/amd64
