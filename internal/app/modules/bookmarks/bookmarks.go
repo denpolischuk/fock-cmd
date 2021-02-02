@@ -30,6 +30,21 @@ func New(conf *config.GlobalConfig) (*Bookmarks, error) {
 					Action:    getAddBookmarkAction(conf),
 				},
 				{
+					Name:        "remove",
+					Aliases:     []string{"rm"},
+					Description: "removes bookmark by it's alias.",
+					Usage:       "fock bm rm [alias].",
+					ArgsUsage:   "[alias] - alias of the bookmark you want to remove.",
+					Action:      getRemoveBookmarksAction(conf),
+					Flags: []cli.Flag{
+						&cli.BoolFlag{
+							Name:    "all",
+							Aliases: []string{"a"},
+							Usage:   "removes all bookmarks.",
+						},
+					},
+				},
+				{
 					Name:    "list",
 					Aliases: []string{"l"},
 					Usage:   "list bookmark.",
