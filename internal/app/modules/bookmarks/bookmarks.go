@@ -29,6 +29,20 @@ func New(conf *config.GlobalConfig) (*Bookmarks, error) {
 					ArgsUsage: "<alias> - url alias for easy access, <URL> - url that will be stored under alias",
 					Action:    getAddBookmarkAction(conf),
 				},
+				{
+					Name:    "list",
+					Aliases: []string{"l"},
+					Usage:   "list bookmark.",
+					Flags: []cli.Flag{
+						&cli.BoolFlag{
+							Name:    "all",
+							Aliases: []string{"a"},
+							Usage:   "shows all flags at once",
+						},
+					},
+					ArgsUsage: "<alias> - url alias for easy access, <URL> - url that will be stored under alias",
+					Action:    getListBookmarksAction(conf),
+				},
 			},
 		},
 		Config: conf,

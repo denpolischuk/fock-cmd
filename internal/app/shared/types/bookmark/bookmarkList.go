@@ -7,7 +7,8 @@ import (
 	"regexp"
 )
 
-const bookamrksCap = 256
+// BookmarksCap - maximum amount of bookmarks
+const BookmarksCap = 256
 
 var re, _ = regexp.Compile(`^[A-z0-9\-\_]{3,32}$`)
 
@@ -18,11 +19,14 @@ type List struct {
 
 // Add - appends new bookmark to the list
 func (bl *List) Add(alias string, URL string) error {
+	if len(bl.List) >= BookmarksCap {
+		return fmt.Errorf("you've reached the maximum amount of bookmarks [256]")
+	}
 	if _, err := url.ParseRequestURI(URL); err != nil {
-		return fmt.Errorf("Invalid URL: %s", err.Error())
+		return fmt.Errorf("invalid URL: %s", err.Error())
 	}
 	if !re.MatchString(alias) {
-		return errors.New("Invalid alias name. It should only contain letters, numbers, - and _ signs, having min length = 3 and max length = 32")
+		return errors.New("invalid alias name. It should only contain letters, numbers, - and _ signs, having min length = 3 and max length = 32")
 	}
 
 	bl.List[alias] = URL
