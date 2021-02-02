@@ -18,7 +18,7 @@ func getAddBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
 			config.ReadErrorDefaultHandler(err)
 		}
 		if c.Args().Len() != 2 {
-			emoji.Println(consts.Emojis["fail"] + " wrong amount of arguments was passed. See usage `fock bm add -h`")
+			emoji.Printf("%s wrong amount of arguments was passed. See usage `fock bm add -h`", consts.Emojis["fail"])
 			os.Exit(1)
 		}
 
@@ -27,7 +27,7 @@ func getAddBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if conf.Bookmarks.List[alias] != "" {
 			resp := utils.PromptUserYesOrNo(fmt.Sprintf("Bookamark with alias `%s` already exists. Do you want to overwrite it? (N/y)", alias))
 			if resp != "y" {
-				emoji.Println(consts.Emojis["fail"] + " no changes were made")
+				emoji.Printf("%s no changes were made", consts.Emojis["fail"])
 				os.Exit(0)
 			}
 		}
