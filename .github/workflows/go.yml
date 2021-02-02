@@ -1,10 +1,7 @@
-name: Go
+name: Build and test
 
 on:
-  push:
-    branches: all
-  pull_request:
-    branches: all
+  push
 
 jobs:
 
@@ -20,3 +17,6 @@ jobs:
 
     - name: Build
       run: make build
+    
+    - name: test
+      run: make test
