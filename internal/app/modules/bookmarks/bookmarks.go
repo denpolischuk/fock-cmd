@@ -47,16 +47,34 @@ func New(conf *config.GlobalConfig) (*Bookmarks, error) {
 				{
 					Name:    "list",
 					Aliases: []string{"l"},
-					Usage:   "list bookmark.",
+					Usage:   "list bookmarks.",
 					Flags: []cli.Flag{
 						&cli.BoolFlag{
 							Name:    "all",
 							Aliases: []string{"a"},
-							Usage:   "shows all flags at once",
+							Usage:   "shows all bookmarks at once",
 						},
 					},
-					ArgsUsage: "<alias> - url alias for easy access, <URL> - url that will be stored under alias",
+					ArgsUsage: "<alias> - alias of the bookmark URL.",
 					Action:    getListBookmarksAction(conf),
+				},
+				{
+					Name:      "open",
+					Aliases:   []string{"o"},
+					Usage:     "open bookmark.",
+					ArgsUsage: "<alias> - alias of the bookmark URL.",
+					Action:    getOpenBookmarkAction(conf),
+					BashComplete: func(c *cli.Context) {
+						if err := conf.Read(); err != nil {
+							return
+						}
+						if conf.Bookmarks == nil || len(conf.Bookmarks.List) == 0 {
+							return
+						}
+						for _, bm := range conf.Bookmarks.List {
+							fmt.Println(bm)
+						}
+					},
 				},
 			},
 		},

@@ -10,10 +10,29 @@ import (
 	"github.com/denpolischuk/fock-cli/internal/app/shared/types/bookmark"
 	"github.com/denpolischuk/fock-cli/internal/app/utils"
 	"github.com/kyokomi/emoji"
+	"github.com/pkg/browser"
 	"github.com/urfave/cli/v2"
 )
 
 const defaultListOutputLimit int16 = 15
+
+func checkBookmarks(conf *config.GlobalConfig) {
+	if conf.Bookmarks == nil || conf.Bookmarks.List == nil || len(conf.Bookmarks.List) == 0 {
+		emoji.Printf("%s you don't have any bookmarks yet...\n", consts.Emojis["think"])
+		os.Exit(0)
+	}
+
+	return
+}
+
+func checkIfBookmarkExists(conf *config.GlobalConfig, alias string) {
+	if conf.Bookmarks.List[alias] == "" {
+		emoji.Printf("%s bookmark with alias `%s` doesn't exist.", consts.Emojis["fail"], alias)
+		os.Exit(0)
+	}
+
+	return
+}
 
 func getAddBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
@@ -55,10 +74,7 @@ func getListBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if err := conf.Read(); err != nil {
 			config.ReadErrorDefaultHandler(err)
 		}
-		if conf.Bookmarks == nil || conf.Bookmarks.List == nil || len(conf.Bookmarks.List) == 0 {
-			emoji.Printf("%s you don't have any bookmarks yet...\n", consts.Emojis["think"])
-			os.Exit(0)
-		}
+		checkBookmarks(conf)
 
 		limit := defaultListOutputLimit
 
@@ -67,6 +83,7 @@ func getListBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 		}
 
 		var i int16 = 0
+		fmt.Println("Here goes your bookmarks list: ")
 		for alias, URL := range conf.Bookmarks.List {
 			if i == limit {
 				return nil
@@ -86,10 +103,7 @@ func getRemoveBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 			config.ReadErrorDefaultHandler(err)
 		}
 
-		if conf.Bookmarks == nil || conf.Bookmarks.List == nil || len(conf.Bookmarks.List) == 0 {
-			emoji.Printf("%s you don't have any bookmarks yet...\n", consts.Emojis["think"])
-			os.Exit(0)
-		}
+		checkBookmarks(conf)
 
 		if c.Bool("all") {
 			conf.Bookmarks.List = make(map[string]string)
@@ -107,11 +121,7 @@ func getRemoveBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 			emoji.Printf("%s you have to specify the name of the bookmark you want to remove.", consts.Emojis["fail"])
 			os.Exit(1)
 		}
-
-		if conf.Bookmarks.List[alias] == "" {
-			emoji.Printf("%s bookmark with alias `%s` doesn't exist.", consts.Emojis["fail"], alias)
-			os.Exit(0)
-		}
+		checkIfBookmarkExists(conf, alias)
 
 		URL := conf.Bookmarks.List[alias]
 		delete(conf.Bookmarks.List, alias)
@@ -121,6 +131,28 @@ func getRemoveBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 		}
 
 		emoji.Printf("%s %s -> %s succesfully removed.", consts.Emojis["success"], alias, URL)
+
+		return nil
+	}
+}
+
+func getOpenBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
+	return func(c *cli.Context) error {
+		if err := conf.Read(); err != nil {
+			config.ReadErrorDefaultHandler(err)
+		}
+
+		checkBookmarks(conf)
+
+		alias := c.Args().First()
+		if c.Args().Len() != 1 || alias == "" {
+			emoji.Printf("%s you have to specify exactly one name of the bookmark you want to open.", consts.Emojis["fail"])
+			os.Exit(1)
+		}
+
+		checkIfBookmarkExists(conf, alias)
+
+		browser.OpenURL(conf.Bookmarks.List[alias])
 
 		return nil
 	}
