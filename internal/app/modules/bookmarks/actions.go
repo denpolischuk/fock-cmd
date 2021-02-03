@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const defaultListOutputLimit int16 = 15
+const defaultListOutputLimit int = 15
 
 func checkBookmarks(conf *config.GlobalConfig) {
 	if conf.Bookmarks == nil || conf.Bookmarks.List == nil || len(conf.Bookmarks.List) == 0 {
@@ -82,15 +82,18 @@ func getListBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 			limit = bookmark.BookmarksCap
 		}
 
-		var i int16 = 0
-		fmt.Println("Here goes your bookmarks list: ")
+		i := 0
+		fmt.Println("Here goes your bookmark list: ")
 		for alias, URL := range conf.Bookmarks.List {
+			fmt.Printf("%s -> %s\n", alias, URL)
+			i++
 			if i == limit {
 				return nil
 			}
+		}
 
-			fmt.Printf("%s -> %s\n", alias, URL)
-			i++
+		if i < len(conf.Bookmarks.List)-1 {
+			fmt.Printf("And %d more...", len(conf.Bookmarks.List)-i-1)
 		}
 
 		return nil
