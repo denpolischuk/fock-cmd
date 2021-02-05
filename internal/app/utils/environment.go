@@ -9,12 +9,11 @@ import (
 // GetUserShell - returns user shell
 func GetUserShell() (string, error) {
 	outp, err := exec.Command("bash", "-c", `echo $SHELL | grep -o -P "[A-z]+$"`).Output()
-	if err != nil {
-		fmt.Println(err)
-		return "", nil
-	}
-
 	shell := string(outp)
+	if err != nil || shell == "" {
+		fmt.Println(err)
+		return "", err
+	}
 
 	re, rErr := regexp.Compile(`\W+`)
 	if rErr != nil {
