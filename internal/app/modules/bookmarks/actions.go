@@ -2,7 +2,6 @@ package bookmarks
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/denpolischuk/fock-cli/internal/app/config"
 	"github.com/denpolischuk/fock-cli/internal/app/consts"
@@ -16,22 +15,20 @@ import (
 
 const defaultListOutputLimit int = 15
 
-func checkBookmarks(conf *config.GlobalConfig) {
+func checkBookmarks(conf *config.GlobalConfig) error {
 	if conf.Bookmarks == nil || conf.Bookmarks.List == nil || len(conf.Bookmarks.List) == 0 {
-		emoji.Printf("%s you don't have any bookmarks yet...\n", consts.Emojis["think"])
-		os.Exit(0)
+		return emoji.Errorf("%s you don't have any bookmarks yet...\n", consts.Emojis["think"])
 	}
 
-	return
+	return nil
 }
 
-func checkIfBookmarkExists(conf *config.GlobalConfig, alias string) {
+func checkIfBookmarkExists(conf *config.GlobalConfig, alias string) error {
 	if conf.Bookmarks.List[alias] == "" {
-		emoji.Printf("%s bookmark with alias `%s` doesn't exist.", consts.Emojis["fail"], alias)
-		os.Exit(0)
+		return emoji.Errorf("%s bookmark with alias `%s` doesn't exist.", consts.Emojis["fail"], alias)
 	}
 
-	return
+	return nil
 }
 
 func getAddBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
@@ -40,8 +37,7 @@ func getAddBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
 			config.ReadErrorDefaultHandler(err)
 		}
 		if c.Args().Len() != 2 {
-			emoji.Printf("%s wrong amount of arguments was passed. See usage `fock bm add -h`", consts.Emojis["fail"])
-			os.Exit(1)
+			return emoji.Errorf("%s wrong amount of arguments was passed. See usage `fock bm add -h`", consts.Emojis["fail"])
 		}
 
 		alias, URL := c.Args().Get(0), c.Args().Get(1)
@@ -49,14 +45,12 @@ func getAddBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if conf.Bookmarks.List[alias] != "" {
 			resp := utils.PromptUserYesOrNo(fmt.Sprintf("Bookamark with alias `%s` already exists. Do you want to overwrite it? (N/y)", alias))
 			if resp != "y" {
-				emoji.Printf("%s no changes were made", consts.Emojis["fail"])
-				os.Exit(0)
+				return emoji.Errorf("%s no changes were made", consts.Emojis["fail"])
 			}
 		}
 
 		if err := conf.Bookmarks.Add(alias, URL); err != nil {
-			emoji.Println(consts.Emojis["fail"] + err.Error())
-			os.Exit(1)
+			return emoji.Errorf(consts.Emojis["fail"] + err.Error())
 		}
 
 		if err := conf.Write(); err != nil {
@@ -74,7 +68,10 @@ func getListBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if err := conf.Read(); err != nil {
 			config.ReadErrorDefaultHandler(err)
 		}
-		checkBookmarks(conf)
+
+		if err := checkBookmarks(conf); err != nil {
+			return err
+		}
 
 		limit := defaultListOutputLimit
 
@@ -106,7 +103,9 @@ func getRemoveBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 			config.ReadErrorDefaultHandler(err)
 		}
 
-		checkBookmarks(conf)
+		if err := checkBookmarks(conf); err != nil {
+			return err
+		}
 
 		if c.Bool("all") {
 			conf.Bookmarks.List = make(map[string]string)
@@ -121,10 +120,12 @@ func getRemoveBookmarksAction(conf *config.GlobalConfig) modules.ActionGetter {
 		alias := c.Args().First()
 
 		if c.Args().Len() != 1 || alias == "" {
-			emoji.Printf("%s you have to specify the name of the bookmark you want to remove.", consts.Emojis["fail"])
-			os.Exit(1)
+			return emoji.Errorf("%s you have to specify the name of the bookmark you want to remove.", consts.Emojis["fail"])
 		}
-		checkIfBookmarkExists(conf, alias)
+
+		if err := checkIfBookmarkExists(conf, alias); err != nil {
+			return err
+		}
 
 		URL := conf.Bookmarks.List[alias]
 		delete(conf.Bookmarks.List, alias)
@@ -145,15 +146,18 @@ func getOpenBookmarkAction(conf *config.GlobalConfig) modules.ActionGetter {
 			config.ReadErrorDefaultHandler(err)
 		}
 
-		checkBookmarks(conf)
+		if err := checkBookmarks(conf); err != nil {
+			return err
+		}
 
 		alias := c.Args().First()
 		if c.Args().Len() != 1 || alias == "" {
-			emoji.Printf("%s you have to specify exactly one name of the bookmark you want to open.", consts.Emojis["fail"])
-			os.Exit(1)
+			return emoji.Errorf("%s you have to specify exactly one name of the bookmark you want to open.", consts.Emojis["fail"])
 		}
 
-		checkIfBookmarkExists(conf, alias)
+		if err := checkIfBookmarkExists(conf, alias); err != nil {
+			return err
+		}
 
 		browser.OpenURL(conf.Bookmarks.List[alias])
 
