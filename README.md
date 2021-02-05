@@ -24,11 +24,11 @@ Run `make` or `make build` to build the project. You will see the binary `fock` 
  - - [ ] Purge node modules
  - - [ ] Install dependencies
  - [ ] Bookmarks
- - - [ ] List bookmarks
- - - [ ] Add bookmarks
- - - [ ] Open bookmark
+ - - [x] List bookmarks
+ - - [x] Add bookmarks
+ - - [x] Open bookmark
  - - - [ ] Autocompletion
- - - [ ] Remove bookmark
+ - - [x] Remove bookmark
  - [ ] Webpack
  - - [ ] Build
  - - - [ ] Build mode [reference/production/development]
