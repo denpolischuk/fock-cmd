@@ -17,7 +17,7 @@ import (
 func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
 		if err := conf.Read(); err != nil {
-			return err
+			config.ReadErrorDefaultHandler(err)
 		}
 		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
@@ -32,7 +32,7 @@ func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
 func getStopAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
 		if err := conf.Read(); err != nil {
-			return err
+			config.ReadErrorDefaultHandler(err)
 		}
 		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
@@ -52,7 +52,7 @@ func getStopAction(conf *config.GlobalConfig) modules.ActionGetter {
 func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
 		if err := conf.Read(); err != nil {
-			return err
+			config.ReadErrorDefaultHandler(err)
 		}
 		substr, _ := conf.GetNodeModulesBinPath("nodemon")
 		if b, p := utils.IsProcessRunning(substr); b {
@@ -91,7 +91,7 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 func getAttachAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
 		if err := conf.Read(); err != nil {
-			return err
+			config.ReadErrorDefaultHandler(err)
 		}
 
 		substr, _ := conf.GetNodeModulesBinPath("nodemon")

@@ -6,6 +6,7 @@ import (
 
 	"github.com/denpolischuk/fock-cli/internal/app/config"
 	"github.com/denpolischuk/fock-cli/internal/app/modules"
+	"github.com/denpolischuk/fock-cli/internal/app/modules/bookmarks"
 	"github.com/denpolischuk/fock-cli/internal/app/modules/initmodule"
 	"github.com/denpolischuk/fock-cli/internal/app/modules/server"
 	"github.com/urfave/cli/v2"
@@ -23,9 +24,15 @@ func LoadModules(c *config.GlobalConfig) (*[]modules.Module, error) {
 		return nil, err
 	}
 
+	bookmarksModule, err := bookmarks.New(c)
+	if err != nil {
+		return nil, err
+	}
+
 	modules := []modules.Module{
 		initModule,
 		serverModule,
+		bookmarksModule,
 	}
 
 	return &modules, nil

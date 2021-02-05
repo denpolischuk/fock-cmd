@@ -93,11 +93,10 @@ func setupAutocompletion(conf *config.GlobalConfig) {
 
 func getInitAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
+		conf.Read()
 		if utils.FileExists(config.ConfFilePath) {
-			fmt.Print(fmt.Sprintf("You already have configured fock CLI, do you want to rewrite configs? (N/y): "))
-			var userInput string
-			fmt.Scanln(&userInput)
-			if strings.ToLower(re.ReplaceAllString(userInput, "")) != "y" {
+			resp := utils.PromptUserYesOrNo(fmt.Sprintf("You already have configured fock CLI, do you want to rewrite configs? (N/y): "))
+			if resp != "y" {
 				setupAutocompletion(conf)
 				return nil
 			}

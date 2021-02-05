@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/denpolischuk/fock-cli/internal/app/shared/types/bookmark"
 	"github.com/denpolischuk/fock-cli/internal/app/utils"
 )
 
@@ -27,7 +28,8 @@ var (
 
 // GlobalConfig - global config of the cli
 type GlobalConfig struct {
-	PathToFock string `json:"pathToFock"`
+	PathToFock string         `json:"pathToFock"`
+	Bookmarks  *bookmark.List `json:"bookmarks"`
 }
 
 // Read - read global config from file
@@ -45,6 +47,10 @@ func (c *GlobalConfig) Read() error {
 	d := json.NewDecoder(confFile)
 	if err := d.Decode(c); err != nil {
 		return err
+	}
+
+	if c.Bookmarks == nil {
+		c.Bookmarks = bookmark.NewList()
 	}
 
 	return nil
@@ -67,7 +73,7 @@ func (c *GlobalConfig) Write() error {
 		os.Mkdir(ConfigDirPath, os.ModePerm)
 	}
 
-	file, err := os.OpenFile(ConfFilePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	file, err := os.OpenFile(ConfFilePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
