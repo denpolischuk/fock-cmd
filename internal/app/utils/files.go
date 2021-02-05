@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,7 +24,7 @@ func PromptPathToResource(promptStr string, def string) string {
 }
 
 // FileContains searches string (str) in file (f). Returns true if str was found in f.
-func FileContains(f *os.File, str string) (bool, error) {
+func FileContains(f io.Reader, str string) (bool, error) {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), str) {
