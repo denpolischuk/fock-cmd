@@ -8,23 +8,33 @@ import (
 	"github.com/denpolischuk/fock-cli/internal/app/modules"
 	"github.com/denpolischuk/fock-cli/internal/app/modules/bookmarks"
 	"github.com/denpolischuk/fock-cli/internal/app/modules/initmodule"
+	"github.com/denpolischuk/fock-cli/internal/app/modules/nginx"
 	"github.com/denpolischuk/fock-cli/internal/app/modules/server"
 	"github.com/urfave/cli/v2"
 )
 
 // LoadModules - loads all cli modules in project
 func LoadModules(c *config.GlobalConfig) (*[]modules.Module, error) {
+	// Load init module
 	initModule, err := initmodule.New(c)
 	if err != nil {
 		return nil, err
 	}
 
+	// Load fock server module
 	serverModule, err := server.New(c)
 	if err != nil {
 		return nil, err
 	}
 
+	// Load bookmarks module
 	bookmarksModule, err := bookmarks.New(c)
+	if err != nil {
+		return nil, err
+	}
+
+	// Load preview nginx module
+	nginxModule, err := nginx.New(c)
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +43,7 @@ func LoadModules(c *config.GlobalConfig) (*[]modules.Module, error) {
 		initModule,
 		serverModule,
 		bookmarksModule,
+		nginxModule,
 	}
 
 	return &modules, nil

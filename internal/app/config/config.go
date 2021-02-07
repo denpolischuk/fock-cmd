@@ -28,8 +28,9 @@ var (
 
 // GlobalConfig - global config of the cli
 type GlobalConfig struct {
-	PathToFock string         `json:"pathToFock"`
-	Bookmarks  *bookmark.List `json:"bookmarks"`
+	PathToFock  string         `json:"pathToFock"`
+	PathToNginx string         `json:"pathToNginx"`
+	Bookmarks   *bookmark.List `json:"bookmarks"`
 }
 
 // Read - read global config from file
@@ -58,6 +59,9 @@ func (c *GlobalConfig) Read() error {
 
 func (c *GlobalConfig) beforeWrite() error {
 	if err := c.checkFockPath(); err != nil {
+		return err
+	}
+	if err := c.checkNginxPath(); err != nil {
 		return err
 	}
 	return nil
@@ -106,6 +110,15 @@ func (c *GlobalConfig) checkFockPath() error {
 	return nil
 }
 
+func (c *GlobalConfig) checkNginxPath() error {
+	p := filepath.Join(path.Clean(c.PathToNginx), "nginx.conf")
+	if !utils.FileExists(p) {
+		return errors.New("nginx path is not correct or folder is missing some files")
+	}
+
+	return nil
+}
+
 // GetFockPath - returns safe fock path string
 func (c *GlobalConfig) GetFockPath() (string, error) {
 	if c.PathToFock == "" {
@@ -113,7 +126,7 @@ func (c *GlobalConfig) GetFockPath() (string, error) {
 			return "", err
 		}
 		if c.PathToFock == "" {
-			return "", fmt.Errorf("PathToFock is empty or config is not initialized")
+			return "", errors.New("PathToFock is empty or config is not initialized")
 		}
 	}
 
