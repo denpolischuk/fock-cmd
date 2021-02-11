@@ -25,3 +25,20 @@ func TestGetUserShell(t *testing.T) {
 		}
 	})
 }
+
+func TestCheckIfAppInstalled(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		r := utils.CheckIfAppInstalled("bash")
+
+		if !r {
+			t.Fail()
+		}
+	})
+	t.Run("fail", func(t *testing.T) {
+		r := utils.CheckIfAppInstalled("somenonexistingbinarytotest")
+
+		if r {
+			t.Fail()
+		}
+	})
+}
