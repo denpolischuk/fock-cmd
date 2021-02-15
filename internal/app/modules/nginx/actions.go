@@ -228,3 +228,29 @@ func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
 		return nil
 	}
 }
+
+func getStatusAction(conf *config.GlobalConfig) modules.ActionGetter {
+	return func(c *cli.Context) error {
+		if err := conf.Read(); err != nil {
+			config.ReadErrorDefaultHandler(err)
+		}
+
+		_, err := conf.GetNginxPath()
+		if err != nil {
+			return err
+		}
+
+		runningContainers, err := exec.Command("bash", "-c", fmt.Sprintf(`docker ps -q --filter="ancestor=%s"`, DefaultImageName)).Output()
+		if err != nil {
+			return err
+		}
+		if len(runningContainers) > 0 {
+
+			emoji.Printf("%s fock preview server container is running %s\n", consts.Emojis["success"], strings.Trim(strings.Join(strings.Split(string(runningContainers), "\n"), ", "), ", \n"))
+		} else {
+			emoji.Printf("%s there are no running containers\n", consts.Emojis["think"])
+		}
+
+		return nil
+	}
+}

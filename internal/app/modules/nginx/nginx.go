@@ -64,7 +64,7 @@ func New(conf *config.GlobalConfig) (*Nginx, error) {
 				{
 					Name:      "start",
 					Usage:     "builds docker image of nginx preview and runs it immidiately away.",
-					UsageText: "fock nginx run - builds and runs nginx preview image.",
+					UsageText: "fock nginx start - builds and runs nginx preview image.",
 					Action:    getStartAction(conf),
 					Flags: []cli.Flag{
 						varnishHostFlag,
@@ -72,6 +72,12 @@ func New(conf *config.GlobalConfig) (*Nginx, error) {
 						portMapFlag,
 						detachedFlag,
 					},
+				},
+				{
+					Name:      "status",
+					Usage:     "checks if fock preview nginx container is running",
+					UsageText: "fock nginx status - checks if fock preview nginx container is running.",
+					Action:    getStatusAction(conf),
 				},
 			},
 		},
