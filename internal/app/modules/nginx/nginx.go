@@ -8,6 +8,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var (
+	varnishHostFlag = &cli.StringFlag{Name: "varnish-host", Usage: "Varnish host", Required: false, Value: consts.DockerHost}
+	varnishPortFlag = &cli.StringFlag{Name: "varnish-port", Usage: "Varnish port", Required: false, Value: consts.VarnishPort}
+	portMapFlag     = &cli.StringFlag{Name: "port", Aliases: []string{"p"}, Usage: "Port mapping", Required: false, Value: "80:80"}
+	detachedFlag    = &cli.BoolFlag{Name: "detached", Aliases: []string{"d"}, Usage: "Detached mode", Value: false}
+)
+
 // Nginx - module to work with preview nginx
 type Nginx struct {
 	Command *cli.Command
@@ -34,8 +41,36 @@ func New(conf *config.GlobalConfig) (*Nginx, error) {
 					UsageText: "fock nginx build - builds nginx preview image.",
 					Action:    getBuildAction(conf),
 					Flags: []cli.Flag{
-						&cli.StringFlag{Name: "varnish-host", Usage: "Varnish host", Required: false, Value: consts.DockerHost},
-						&cli.StringFlag{Name: "varnish-port", Usage: "Varnish port", Required: false, Value: consts.VarnishPort},
+						varnishHostFlag,
+						varnishPortFlag,
+					},
+				},
+				{
+					Name:      "run",
+					Usage:     "runs previously built docker image of nginx preview.",
+					UsageText: "fock nginx run - runs nginx preview container.",
+					Action:    getRunAction(conf),
+					Flags: []cli.Flag{
+						portMapFlag,
+						detachedFlag,
+					},
+				},
+				{
+					Name:      "stop",
+					Usage:     "stops running nginx preview container.",
+					UsageText: "fock nginx stop - stops nginx preview container.",
+					Action:    getStopAction(conf),
+				},
+				{
+					Name:      "start",
+					Usage:     "builds docker image of nginx preview and runs it immidiately away.",
+					UsageText: "fock nginx run - builds and runs nginx preview image.",
+					Action:    getStartAction(conf),
+					Flags: []cli.Flag{
+						varnishHostFlag,
+						varnishPortFlag,
+						portMapFlag,
+						detachedFlag,
 					},
 				},
 			},

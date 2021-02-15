@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/denpolischuk/fock-cli/internal/app/config"
 	"github.com/denpolischuk/fock-cli/internal/app/consts"
@@ -41,6 +42,44 @@ func beforeBuild(filepath string, vHost string, vPort string) error {
 		return err
 	}
 	err = w.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func buildImage(p string) error {
+	dockerCommand := fmt.Sprintf("docker build -t %s %s", DefaultImageName, p)
+
+	cmd := exec.Command("bash", "-c", dockerCommand)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	cmd.Stdout = nil
+	cmd.Stderr = nil
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runImage(portMap string, detached bool) error {
+	d := ""
+	if detached {
+		d = "-d"
+	}
+	dockerCommand := fmt.Sprintf("docker run -p %s %s %s", portMap, d, DefaultImageName)
+
+	cmd := exec.Command("bash", "-c", dockerCommand)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	cmd.Stdout = nil
+	cmd.Stderr = nil
 	if err != nil {
 		return err
 	}
@@ -106,17 +145,83 @@ func getBuildAction(conf *config.GlobalConfig) modules.ActionGetter {
 		if err := beforeBuild(filepath.Join(p, "common", "server-commons-include.conf"), host, port); err != nil {
 			return err
 		}
+		return buildImage(p)
+	}
+}
 
-		dockerCommand := fmt.Sprintf("docker build -t %s %s", DefaultImageName, p)
+func getRunAction(conf *config.GlobalConfig) modules.ActionGetter {
+	return func(c *cli.Context) error {
+		if err := conf.Read(); err != nil {
+			config.ReadErrorDefaultHandler(err)
+		}
 
-		cmd := exec.Command("bash", "-c", dockerCommand)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		err = cmd.Run()
-		cmd.Stdout = nil
-		cmd.Stderr = nil
+		_, err := conf.GetNginxPath()
 		if err != nil {
+			return err
+		}
+
+		d := c.Bool("detached")
+		p := c.String("port")
+
+		if err := runImage(p, d); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func getStopAction(conf *config.GlobalConfig) modules.ActionGetter {
+	return func(c *cli.Context) error {
+		if err := conf.Read(); err != nil {
+			config.ReadErrorDefaultHandler(err)
+		}
+
+		_, err := conf.GetNginxPath()
+		if err != nil {
+			return err
+		}
+
+		runningContainers, err := exec.Command("bash", "-c", fmt.Sprintf(`docker ps -q --filter="ancestor=%s"`, DefaultImageName)).Output()
+		if err != nil {
+			return err
+		}
+		if len(runningContainers) > 0 {
+			stopCommand := fmt.Sprintf(`docker stop %s`, runningContainers)
+			err = exec.Command("bash", "-c", stopCommand).Run()
+			if err != nil {
+				return err
+			}
+			emoji.Printf("%s %s container stopped\n", consts.Emojis["success"], strings.Trim(strings.Join(strings.Split(string(runningContainers), "\n"), ", "), ", \n"))
+		} else {
+			emoji.Printf("%s there are no running containers\n", consts.Emojis["think"])
+		}
+
+		return nil
+	}
+}
+
+func getStartAction(conf *config.GlobalConfig) modules.ActionGetter {
+	return func(c *cli.Context) error {
+		if err := conf.Read(); err != nil {
+			config.ReadErrorDefaultHandler(err)
+		}
+
+		p, err := conf.GetNginxPath()
+		if err != nil {
+			return err
+		}
+
+		host, port, pMap, d := c.String("varnish-host"), c.String("varnish-port"), c.String("port"), c.Bool("detached")
+
+		if err := beforeBuild(filepath.Join(p, "common", "server-commons-include.conf"), host, port); err != nil {
+			return err
+		}
+		if err := buildImage(p); err != nil {
+			return err
+		}
+
+		if err := runImage(pMap, d); err != nil {
 			return err
 		}
 
