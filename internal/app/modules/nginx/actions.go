@@ -113,13 +113,13 @@ func getBuildAction(conf *config.GlobalConfig) modules.ActionGetter {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
-		if err := cmd.Run(); err != nil {
-			cmd.Stdout = nil
-			cmd.Stderr = nil
-			return err
-		}
+		err = cmd.Run()
 		cmd.Stdout = nil
 		cmd.Stderr = nil
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
 }
