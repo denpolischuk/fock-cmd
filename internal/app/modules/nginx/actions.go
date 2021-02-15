@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 
@@ -106,6 +107,19 @@ func getBuildAction(conf *config.GlobalConfig) modules.ActionGetter {
 			return err
 		}
 
+		dockerCommand := fmt.Sprintf("docker build -t %s %s", DefaultImageName, p)
+
+		cmd := exec.Command("bash", "-c", dockerCommand)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			cmd.Stdout = nil
+			cmd.Stderr = nil
+			return err
+		}
+		cmd.Stdout = nil
+		cmd.Stderr = nil
 		return nil
 	}
 }
