@@ -26,7 +26,7 @@ func beforeBuild(filepath string, vHost string, vPort string) error {
 	if len(vPort) > 0 {
 		proxyTarget = fmt.Sprintf("%s:%s", proxyTarget, vPort)
 	}
-	r, err := utils.ReplaceInFile(f, `proxy_target \"[0-9\.:]+\"`, fmt.Sprintf(`proxy_target "%s"`, proxyTarget), true)
+	r, err := utils.ReplaceInFile(f, `proxy_target\s+\"[localhost0-9\.:]+\"`, fmt.Sprintf(`proxy_target "%s"`, proxyTarget), true)
 	if err != nil {
 		return err
 	}
