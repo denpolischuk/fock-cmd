@@ -1,9 +1,11 @@
 package nginx
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/denpolischuk/fock-cli/internal/app/config"
 	"github.com/denpolischuk/fock-cli/internal/app/consts"
@@ -13,10 +15,46 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+func beforeBuild(filepath string, vHost string, vPort string) error {
+	f, err := os.OpenFile(filepath, os.O_RDWR, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	proxyTarget := vHost
+	if len(vPort) > 0 {
+		proxyTarget = fmt.Sprintf("%s:%s", proxyTarget, vPort)
+	}
+	r, err := utils.ReplaceInFile(f, `proxy_target \"[0-9\.:]+\"`, fmt.Sprintf(`proxy_target "%s"`, proxyTarget), true)
+	if err != nil {
+		return err
+	}
+
+	// Clear file and write new config
+	f.Truncate(0)
+	f.Seek(0, 0)
+	w := bufio.NewWriter(f)
+	_, err = w.WriteString(r)
+	if err != nil {
+		return err
+	}
+	err = w.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func getInitAction(conf *config.GlobalConfig) modules.ActionGetter {
 	return func(c *cli.Context) error {
 		if err := conf.Read(); err != nil {
 			config.ReadErrorDefaultHandler(err)
+		}
+
+		if !utils.CheckIfAppInstalled("docker") {
+			return emoji.Errorf("%s you need to have docker installed to make this module work.", consts.Emojis["fail"])
 		}
 
 		var p string
@@ -46,6 +84,27 @@ func getInitAction(conf *config.GlobalConfig) modules.ActionGetter {
 			return err
 		}
 		emoji.Printf("%s nginx initialized succesfully.\n", consts.Emojis["success"])
+
+		return nil
+	}
+}
+
+func getBuildAction(conf *config.GlobalConfig) modules.ActionGetter {
+	return func(c *cli.Context) error {
+		if err := conf.Read(); err != nil {
+			config.ReadErrorDefaultHandler(err)
+		}
+
+		p, err := conf.GetNginxPath()
+		if err != nil {
+			return err
+		}
+
+		host, port := c.String("varnish-host"), c.String("varnish-port")
+
+		if err := beforeBuild(filepath.Join(p, "common", "server-commons-include.conf"), host, port); err != nil {
+			return err
+		}
 
 		return nil
 	}

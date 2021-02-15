@@ -128,11 +128,25 @@ func (c *GlobalConfig) GetFockPath() (string, error) {
 			return "", err
 		}
 		if c.PathToFock == "" {
-			return "", errors.New("PathToFock is empty or config is not initialized")
+			return "", errors.New("path to fock is empty or config is not initialized")
 		}
 	}
 
 	return filepath.Clean(c.PathToFock), nil
+}
+
+// GetNginxPath - returns safe fock path string
+func (c *GlobalConfig) GetNginxPath() (string, error) {
+	if c.PathToNginx == "" {
+		if err := c.Read(); err != nil {
+			return "", err
+		}
+		if c.PathToNginx == "" {
+			return "", errors.New("path to nginx is empty. Probably it hasn't been initialized. Use 'fock nginx init -h' to figure out more")
+		}
+	}
+
+	return filepath.Clean(c.PathToNginx), nil
 }
 
 // GetNodeModulesBinPath - returns path to fock's node_modules/.bin dir
