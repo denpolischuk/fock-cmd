@@ -61,8 +61,10 @@ func (c *GlobalConfig) beforeWrite() error {
 	if err := c.checkFockPath(); err != nil {
 		return err
 	}
-	if err := c.checkNginxPath(); err != nil {
-		return err
+	if c.PathToNginx != "" {
+		if err := c.checkNginxPath(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
