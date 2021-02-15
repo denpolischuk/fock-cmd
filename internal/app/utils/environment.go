@@ -22,3 +22,12 @@ func GetUserShell() (string, error) {
 
 	return re.ReplaceAllString(shell, ""), nil
 }
+
+// CheckIfAppInstalled - checks if application installed in OS
+func CheckIfAppInstalled(name string) bool {
+	err := exec.Command("bash", "-c", fmt.Sprintf("which %s", name)).Run()
+	if err != nil {
+		return false
+	}
+	return true
+}

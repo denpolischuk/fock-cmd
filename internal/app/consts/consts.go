@@ -23,4 +23,8 @@ var (
 const (
 	// AppBinName - binary file name
 	AppBinName = "fock"
+	// VarnishPort - default varnish port
+	VarnishPort = "8888"
+	//DockerHost - default docker host
+	DockerHost = "172.17.0.1"
 )

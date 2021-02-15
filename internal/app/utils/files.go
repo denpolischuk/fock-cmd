@@ -5,23 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
+	"regexp"
 	"strings"
 )
-
-// PromptPathToResource - Asks user path to zsh or uses default one if user input is empty
-func PromptPathToResource(promptStr string, def string) string {
-	path := def
-	var userInput string
-	fmt.Printf("%s [%s]: ", promptStr, path)
-	userInput = ""
-	fmt.Scanln(&userInput)
-	if userInput != "" {
-		path = userInput
-	}
-
-	return filepath.Clean(path)
-}
 
 // FileContains searches string (str) in file (f). Returns true if str was found in f.
 func FileContains(f io.Reader, str string) (bool, error) {
@@ -36,6 +22,35 @@ func FileContains(f io.Reader, str string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// ReplaceInFile - finds and replaces string in file once
+func ReplaceInFile(f io.ReadWriter, target string, replacement string, regexpMode bool) (string, error) {
+	scanner := bufio.NewScanner(f)
+	var str string
+	re, err := regexp.Compile(target)
+	if err != nil {
+		return "", err
+	}
+	for scanner.Scan() {
+		tStr := scanner.Text()
+		if regexpMode {
+			if re.MatchString(tStr) {
+				tStr = re.ReplaceAllString(tStr, replacement)
+			}
+		} else {
+			if strings.Contains(tStr, target) {
+				tStr = strings.Replace(tStr, target, replacement, -1)
+			}
+		}
+		str += fmt.Sprintf("%s\n", tStr)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+
+	return str, nil
 }
 
 // FileExists - returns true if file exists, false otherwise
