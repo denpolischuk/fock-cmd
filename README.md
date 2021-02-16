@@ -35,6 +35,6 @@ Run `make` or `make build` to build the project. You will see the binary `fock` 
  - - [ ] Watch
  - [ ] Open in Editor
  - - [ ] VS Code
- - [ ] Nginx
+ - [x] Nginx
  - [ ] Varnish
  
